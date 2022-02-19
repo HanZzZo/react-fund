@@ -2,7 +2,14 @@ import React from 'react'
 import PostItem from './PostItem'
 
 const PostList = ({posts, title, remove}) => { //передаем props, но можем вытащить сразу нужное поле 
-    return (
+    if(!posts.length) {
+      return (
+        <h1 style={{textAlign: 'center'}}>
+            Посты не найдены
+           </h1>
+      )
+    }
+  return (
         //может быть только один корневой элемент 
        <div>
          <h1 style={{textAlign: 'center'}}>

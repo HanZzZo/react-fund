@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'; //реакт импортируем в каждый файл где создаем компанент 
+import React, { useState, useMemo } from 'react'; //реакт импортируем в каждый файл где создаем компанент 
 import Counter from './components/Counter'
 import ClassCounter from './components/classComponents';
 import './styles/App.css'
@@ -8,16 +8,29 @@ import MyButton from './components/UI/button/MyButton'
 import MyInput from './components/UI/input/MyInput'
 import PostForm from './components/PostForm';
 import MySelect from './components/UI/select/MySelect';
-
+import PostFilter from './components/PostFilter';
 
 function App() {
   const [posts, setPosts] = useState([ //массив с состоянием постов
     {id: 1, title: 'JavaScript', body: 'Description'},
-    {id: 2, title: 'JavaScript 2', body: 'Description'},
-    {id: 3, title: 'JavaScript 3', body: 'Description'}
+    {id: 2, title: 'vdfv', body: 'jnnrg'},
+    {id: 3, title: 'gbdfvb', body: 'nhgg'}
   ])
-  //реализовываем двусторонние связывание для MySelect
-  const [selectedSort, setSelectedSort] = useState('')
+ 
+  const [filter, setFilter] = useState({sort: '', query: ''}) //содержит алгоритм сортировки и поисковая строка
+
+  const sortedPosts = useMemo(() => {
+    console.log('Отработала функция сортед');
+    if(filter.sort) {
+      return [...posts].sort((a, b) => a[filter.sort].localeCompare(b[filter.sort]))
+     }
+     return posts
+  }, [filter.sort, posts])//callback будет вызван только тогда, когда если какая-то зависимость в массиве поменят свое значение
+
+  const sortedAndSearchedPosts = useMemo(() => {
+    return sortedPosts.filter(post => post.title.toLowerCase().includes(filter.query.toLowerCase())) //поиск 
+  }, [filter.query, sortedPosts]) //отсортированный и поиск
+
   //callback ожидает на входе новый созданный пост его будем пердавать в компоненте PostForm
   const createPost = (newPost) => {
     //здесь мы только изменяем состояние
@@ -29,45 +42,18 @@ const removePost = (post) => {
   setPosts(posts.filter(p => p.id !== post.id))
 }
 //когда пользователь выбрал алгоритм сортировки необходимо массив отсортировать
-  const sortPosts = (sort) => {
-    // вызываем ф-ию setSelectedSort и передавать то что приходит из самого селекта(сразу та опция, которую выбрал пользователь)\
-    setSelectedSort(sort)
-    //вызываем ф-ию setPosts чтобы передать отсортированный массив
-    //ф-ию sort не возвращает новый отсортированный массив, а мутирует тот массив к которому эта ф-ию была применена
-    //поэтому мы развернем посты в новый массив и отсортируем уже этот массив(мутирем копию массив)
-    setPosts([...posts].sort((a, b) => a[sort].localeCompare(b[sort])))//localeCompare- нужна для сравнения строк чаще используется при сортировке 
-
-  }
 
   return (
     <div className="App">
       {/* передаем callback */}
       <PostForm create={createPost}/>
        <hr style={{margin: '15px 0'}}/>
-      <div>
-        
-          {/* сортировка */}
-          <MySelect 
-          value={selectedSort}
-          onChange={sortPosts}
-          defaultValue="Сортировка по"
-          options={[
-            {value: 'title', name: 'По названию '},
-            {value: 'body', name: 'По описанию '},
-          ]}
-          />
-      </div>
+       <PostFilter 
+       filter={filter}
+       setFilter={setFilter}
+       />
       {/* условная отрисовка, если все посты удалили */}
-      {posts.length 
-          ? 
-          <PostList remove={removePost} posts={posts} title="Посты про JS"/>
-          : 
-          <h1 style={{textAlign: 'center'}}>
-            Посты не найдены
-           </h1>
-      
-      }
-     
+          <PostList remove={removePost} posts={sortedAndSearchedPosts} title="Посты про JS"/>
     </div>
   );
 }
