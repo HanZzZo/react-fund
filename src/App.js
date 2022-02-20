@@ -10,35 +10,31 @@ import PostForm from './components/PostForm';
 import MySelect from './components/UI/select/MySelect';
 import PostFilter from './components/PostFilter';
 import MyModal from './components/UI/MyModal/MyModal';
+import {usePosts} from './hooks/usePosts';
+import axios from 'axios';
+
+
 
 function App() {
-  const [posts, setPosts] = useState([ //массив с состоянием постов
-    {id: 1, title: 'JavaScript', body: 'Description'},
-    {id: 2, title: 'vdfv', body: 'jnnrg'},
-    {id: 3, title: 'gbdfvb', body: 'nhgg'}
-  ])
- 
+  const [posts, setPosts] = useState([])
   const [filter, setFilter] = useState({sort: '', query: ''}) //содержит алгоритм сортировки и поисковая строка
   //состояние которое отвечает за видимость окна и за то чтобы мы могли динамически управлять(показываьт при нажатии на кнопку)
   const [modal, setModal] = useState(false) 
+  //собственный хук
+  const sortedAndSearchedPosts = usePosts(posts, filter.sort, filter.query)
 
-  const sortedPosts = useMemo(() => {
-    console.log('Отработала функция сортед');
-    if(filter.sort) {
-      return [...posts].sort((a, b) => a[filter.sort].localeCompare(b[filter.sort]))
-     }
-     return posts
-  }, [filter.sort, posts])//callback будет вызван только тогда, когда если какая-то зависимость в массиве поменят свое значение
-
-  const sortedAndSearchedPosts = useMemo(() => {
-    return sortedPosts.filter(post => post.title.toLowerCase().includes(filter.query.toLowerCase())) //поиск 
-  }, [filter.query, sortedPosts]) //отсортированный и поиск
 
   //callback ожидает на входе новый созданный пост его будем пердавать в компоненте PostForm
   const createPost = (newPost) => {
     //здесь мы только изменяем состояние
     setPosts([...posts, newPost])
     setModal(false) //скрывет модальное окно
+  }
+
+  //отправляет зпрос на сервер,получать данные и помещать в состояние с постами
+  async function fetchPosts() {
+    const response = await axios.get('https://jsonplaceholder.typicode.com/posts')
+    setPosts(response.data)
   }
 // получаем post из дочернего компонента
 const removePost = (post) => {
@@ -49,6 +45,7 @@ const removePost = (post) => {
 
   return (
     <div className="App">
+      <button onClick={fetchPosts}>GET POST</button>
       <MyButton style={{marginTop: 30}} onClick={() => setModal(true)}>
         Создать пользователя
       </MyButton>
@@ -56,7 +53,6 @@ const removePost = (post) => {
       {/* передаем callback */}
       <PostForm create={createPost}/>
       </MyModal>
-      
        <hr style={{margin: '15px 0'}}/>
        <PostFilter 
        filter={filter}
