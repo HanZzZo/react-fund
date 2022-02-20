@@ -9,6 +9,7 @@ import MyInput from './components/UI/input/MyInput'
 import PostForm from './components/PostForm';
 import MySelect from './components/UI/select/MySelect';
 import PostFilter from './components/PostFilter';
+import MyModal from './components/UI/MyModal/MyModal';
 
 function App() {
   const [posts, setPosts] = useState([ //массив с состоянием постов
@@ -18,6 +19,8 @@ function App() {
   ])
  
   const [filter, setFilter] = useState({sort: '', query: ''}) //содержит алгоритм сортировки и поисковая строка
+  //состояние которое отвечает за видимость окна и за то чтобы мы могли динамически управлять(показываьт при нажатии на кнопку)
+  const [modal, setModal] = useState(false) 
 
   const sortedPosts = useMemo(() => {
     console.log('Отработала функция сортед');
@@ -35,6 +38,7 @@ function App() {
   const createPost = (newPost) => {
     //здесь мы только изменяем состояние
     setPosts([...posts, newPost])
+    setModal(false) //скрывет модальное окно
   }
 // получаем post из дочернего компонента
 const removePost = (post) => {
@@ -45,8 +49,14 @@ const removePost = (post) => {
 
   return (
     <div className="App">
+      <MyButton style={{marginTop: 30}} onClick={() => setModal(true)}>
+        Создать пользователя
+      </MyButton>
+      <MyModal visible={modal} setVisible={setModal}>
       {/* передаем callback */}
       <PostForm create={createPost}/>
+      </MyModal>
+      
        <hr style={{margin: '15px 0'}}/>
        <PostFilter 
        filter={filter}

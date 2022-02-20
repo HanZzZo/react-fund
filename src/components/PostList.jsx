@@ -1,5 +1,6 @@
 import React from 'react'
 import PostItem from './PostItem'
+import {TransitionGroup, CSSTransition} from "react-transition-group"
 
 const PostList = ({posts, title, remove}) => { //передаем props, но можем вытащить сразу нужное поле 
     if(!posts.length) {
@@ -15,11 +16,20 @@ const PostList = ({posts, title, remove}) => { //передаем props, но м
          <h1 style={{textAlign: 'center'}}>
          {title}
       </h1>
+      <TransitionGroup>
       {posts.map((post, index) =>
-      //каждый элемент превращаем в реакт эл 
-      //когда создаем списки обязательно надо указать ключ 
+        <CSSTransition
+          key={post.id}
+          timeout={500}
+          classNames="post"
+        >
+      {/* //каждый элемент превращаем в реакт эл 
+      //когда создаем списки обязательно надо указать ключ  */}
         <PostItem remove={remove} number={index + 1} post={post} key={post.id}/>
+        </CSSTransition>
         )}
+      </TransitionGroup>
+      
        </div>
     )
 }
