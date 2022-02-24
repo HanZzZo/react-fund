@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'; //реакт импортируем в каждый файл где создаем компанент 
+import React, { useState, useEffect  } from 'react'; //реакт импортируем в каждый файл где создаем компанент 
 import Counter from './components/Counter'
 import ClassCounter from './components/classComponents';
 import './styles/App.css'
@@ -12,7 +12,9 @@ import PostFilter from './components/PostFilter';
 import MyModal from './components/UI/MyModal/MyModal';
 import {usePosts} from './hooks/usePosts';
 import axios from 'axios';
-
+import PostService from './API/PostService';
+import Loader from './components/UI/Loader/Loader';
+import { useFetching } from './hooks/useFetching';
 
 
 function App() {
@@ -22,7 +24,15 @@ function App() {
   const [modal, setModal] = useState(false) 
   //собственный хук
   const sortedAndSearchedPosts = usePosts(posts, filter.sort, filter.query)
+  //хук который предоставляет обработку индикация загрузки и обработку ошибоки какого-то запроса на получение данных
+  const [fetchPosts, isPostsLoading, postError] = useFetching(async () => {
+    const posts = await PostService.getAll( )
+    setPosts(posts)
+  })
 
+useEffect(() => {
+  fetchPosts()
+}, [])//массив зависимостей будет пустым для того чтобы ф-ия отработала 1 раз
 
   //callback ожидает на входе новый созданный пост его будем пердавать в компоненте PostForm
   const createPost = (newPost) => {
@@ -31,11 +41,7 @@ function App() {
     setModal(false) //скрывет модальное окно
   }
 
-  //отправляет зпрос на сервер,получать данные и помещать в состояние с постами
-  async function fetchPosts() {
-    const response = await axios.get('https://jsonplaceholder.typicode.com/posts')
-    setPosts(response.data)
-  }
+
 // получаем post из дочернего компонента
 const removePost = (post) => {
   //надо удалить пост, который мы предали аргументам
@@ -58,8 +64,14 @@ const removePost = (post) => {
        filter={filter}
        setFilter={setFilter}
        />
-      {/* условная отрисовка, если все посты удалили */}
-          <PostList remove={removePost} posts={sortedAndSearchedPosts} title="Посты про JS"/>
+       {postError && 
+          <h1>Произошла ошибка ${postError}</h1>
+       }
+       {isPostsLoading
+          ?  <div style={{display:'flex', justifyContent: 'center', marginTop: "50px"}}> <Loader/> </div>
+          : <PostList remove={removePost} posts={sortedAndSearchedPosts} title="Посты про JS"/>
+       }
+      
     </div>
   );
 }
