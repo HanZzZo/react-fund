@@ -4,10 +4,10 @@ export const useFetching = (callback) => { //перед каким-то запр
     const [isLoading, setIsLoading] = useState(false)
     //для обработки ошибок
     const [error, setError] = useState('')
-    const fetching = async () => {
+    const fetching = async (...args) => { //необходимо принять аргументы и передать в колбэк
         try {
             setIsLoading(true) 
-            await callback()
+            await callback(...args)
         } catch (e) {
             setError(e.massage)
         } finally {

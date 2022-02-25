@@ -15,6 +15,9 @@ import axios from 'axios';
 import PostService from './API/PostService';
 import Loader from './components/UI/Loader/Loader';
 import { useFetching } from './hooks/useFetching';
+import {getPageCount, getPagesArray} from './utils/pages'
+import Pagination from './components/UI/pagination/Pagination';
+
 
 
 function App() {
@@ -22,17 +25,27 @@ function App() {
   const [filter, setFilter] = useState({sort: '', query: ''}) //содержит алгоритм сортировки и поисковая строка
   //состояние которое отвечает за видимость окна и за то чтобы мы могли динамически управлять(показываьт при нажатии на кнопку)
   const [modal, setModal] = useState(false) 
+  //состояние где общее количество постов
+  const [totalPage, setTotalPage] = useState(0)
+  const [limit, setLimit] = useState(10)
+  const [page, setPage] = useState(1)
+
   //собственный хук
   const sortedAndSearchedPosts = usePosts(posts, filter.sort, filter.query)
+  
   //хук который предоставляет обработку индикация загрузки и обработку ошибоки какого-то запроса на получение данных
-  const [fetchPosts, isPostsLoading, postError] = useFetching(async () => {
-    const posts = await PostService.getAll( )
-    setPosts(posts)
+  const [fetchPosts, isPostsLoading, postError] = useFetching(async (limit, page) => {
+    const response = await PostService.getAll(limit, page)
+    setPosts(response.data)
+   const totalCount = response.headers['x-total-count']
+    //после того как получили ответ от сервера обращаемся к хедерам и достам x-total-count
+    setTotalPage(getPageCount(totalCount, limit))
   })
 
+
 useEffect(() => {
-  fetchPosts()
-}, [])//массив зависимостей будет пустым для того чтобы ф-ия отработала 1 раз
+  fetchPosts(limit, page)
+}, [])
 
   //callback ожидает на входе новый созданный пост его будем пердавать в компоненте PostForm
   const createPost = (newPost) => {
@@ -47,11 +60,16 @@ const removePost = (post) => {
   //надо удалить пост, который мы предали аргументам
   setPosts(posts.filter(p => p.id !== post.id))
 }
-//когда пользователь выбрал алгоритм сортировки необходимо массив отсортировать
+
+
+//создадим функция, которая будет изменять номер старницы и с измененым номером подгружать новую порцию данных
+const changePage = (page) => {
+  setPage(page)
+  fetchPosts(limit, page)
+}
 
   return (
     <div className="App">
-      <button onClick={fetchPosts}>GET POST</button>
       <MyButton style={{marginTop: 30}} onClick={() => setModal(true)}>
         Создать пользователя
       </MyButton>
@@ -70,8 +88,11 @@ const removePost = (post) => {
        {isPostsLoading
           ?  <div style={{display:'flex', justifyContent: 'center', marginTop: "50px"}}> <Loader/> </div>
           : <PostList remove={removePost} posts={sortedAndSearchedPosts} title="Посты про JS"/>
-       }
-      
+       } 
+       <Pagination 
+       page={page} 
+       changePage={changePage} 
+       totalPage={totalPage}/>
     </div>
   );
 }
