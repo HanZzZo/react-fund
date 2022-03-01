@@ -6,7 +6,8 @@
 
 #root {/*блок находится в index.html*/
     display: flex;
-    justify-content: center;
+    flex-direction: column; /* направление в колонку */
+    align-items: center;
 }
 
 .App {
@@ -53,4 +54,17 @@
     border: 2px solid orange;
     font-weight: bold;
     transform: scale(1.1);
+  }
+
+  .navbar {
+    height: 50px;
+    width: 100vw;
+    display: flex;
+    align-items: center;
+    padding: 0 15px;
+    background-color: tomato;
+  }
+
+  .navbar__links {
+    margin-left: auto;
   }
