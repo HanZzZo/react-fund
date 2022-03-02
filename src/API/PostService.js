@@ -9,4 +9,14 @@ static async getAll(limit = 10, page = 1) {
     })
     return response// нужно будет обращаться к хедерам и вытаскивать нужное количество постов
  }
+
+static async getById(id) {
+    const response = await axios.get('https://jsonplaceholder.typicode.com/posts/' + id)
+    return response
+}
+
+static async getCommentsByPostId(id) {
+    const response = await axios.get(`https://jsonplaceholder.typicode.com/posts/${id}/comments`)
+    return response
+}
 }

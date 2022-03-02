@@ -5,10 +5,9 @@ const Navbar = () => {
     return (
         <div className='navbar'>
       <div className="navbar__links">
-        {/* используем компонент Link */}
-        <Link to="/about">0 сайт</Link>
-        <Link to="/posts">Посты </Link>
-      </div>
+                <Link to="/about">О сайте</Link>
+                <Link to="/posts">Посты</Link>
+            </div>
     </div>
     )
 }

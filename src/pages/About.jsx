@@ -3,7 +3,7 @@ import React from 'react'
 const About = () => {
   return (
     <h1>
-      jvsscs
+      страница о сайте
     </h1>
   )
 }
